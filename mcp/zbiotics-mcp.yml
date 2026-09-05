@@ -1,0 +1,138 @@
+generated: '2026-09-05'
+method: probed
+source: https://zbiotics.com/api/ucp/mcp
+name: ZBiotics Universal Commerce (UCP) MCP Server
+summary: >-
+  ZBiotics exposes a live Model Context Protocol server on its own domain at /api/ucp/mcp. It
+  implements the Universal Commerce Protocol (UCP) dev.ucp.shopping service and answers tools/list
+  and initialize without credentials, returning 13 tools with full JSON Schema 2020-12
+  inputSchemas covering catalog search/lookup, cart, checkout and order retrieval for the ZBiotics
+  store. Discovery is open; invocation is not - tools/call requires a dereferenceable ucp-agent
+  profile URI, and get_order additionally requires a customer-account JWT.
+status: live
+ownership_note: >-
+  The endpoint is served by Shopify (the store's commerce platform) but it is published on the
+  company's own registrable domain, is scoped to the ZBiotics store (shop_id 11751391332), and the
+  UCP manifest at /.well-known/ucp.json names merchant "ZBiotics" with merchant_origin
+  zbiotics.com. It transacts ZBiotics' own catalog and nobody else's, so it is recorded as
+  ZBiotics' agent surface, in the same way a provider's API hosted on AWS is the provider's API.
+deployment:
+  mode: remote
+  endpoint: https://zbiotics.com/api/ucp/mcp
+  auth: unknown
+  auth_detail: >-
+    Tiered, and none of the tiers is a conventional API key. tools/list and initialize are
+    anonymous. tools/call requires meta["ucp-agent"].profile to resolve to a document the store can
+    fetch. get_order requires a customer-account JWT (HTTP 403 -32000 AuthenticationRequired
+    observed anonymously). Recorded as unknown rather than none or oauth because no single value
+    describes it; see authentication/zbiotics-authentication.yml.
+  verified: probed
+protocol:
+  transport: streamable-http
+  jsonrpc: '2.0'
+  mcp_protocol_version: '2025-06-18'
+  server_info:
+    name: universal-commerce
+    version: 0.1.0
+  ucp_api_version: '2026-08-25'
+  response_header: x-shopify-ucp-mcp-api-version
+server_capabilities:
+  tools:
+    listChanged: true
+  prompts:
+    listChanged: true
+  resources:
+    listChanged: true
+  logging: {}
+capability_notes:
+  - >-
+    The server advertises prompts and resources capabilities, but prompts/list and resources/list
+    both returned JSON-RPC error -32001 "UCP discovery failed" (data.code invalid_profile_url)
+    because every call requires meta["ucp-agent"].profile. Only tools/list answered anonymously.
+alternate_endpoints:
+  - url: https://zbiotics.myshopify.com/api/ucp/mcp
+    note: The myshopify.com origin serves the identical tool list; it is the same store.
+tools_file: zbiotics-mcp-tools.json
+tool_count: 13
+tools:
+  - name: search_catalog
+    category: catalog
+    read_only: true
+    description: Search for products from the ZBiotics online store.
+  - name: lookup_catalog
+    category: catalog
+    read_only: true
+    description: Look up multiple products or variants by identifier (1-10 ids per call).
+  - name: get_product
+    category: catalog
+    read_only: true
+    description: Retrieve complete product detail by identifier; returns a single product.
+  - name: get_cart
+    category: cart
+    read_only: true
+    description: Get the cart contents.
+  - name: create_cart
+    category: cart
+    read_only: false
+    description: Creates a new cart from line_items (product variant id + quantity).
+  - name: update_cart
+    category: cart
+    read_only: false
+    description: Perform updates to a cart.
+  - name: cancel_cart
+    category: cart
+    read_only: false
+    reversal_of: create_cart
+    description: Cancels a cart.
+  - name: get_checkout
+    category: checkout
+    read_only: true
+    description: Returns checkout details including line items, totals, discounts and taxes.
+  - name: create_checkout
+    category: checkout
+    read_only: false
+    description: Creates a checkout.
+  - name: update_checkout
+    category: checkout
+    read_only: false
+    description: Updates a checkout (shipping address, fulfillment method, payment instruments).
+  - name: complete_checkout
+    category: checkout
+    read_only: false
+    description: >-
+      Completes a checkout and returns the order ID / Thank You Page URL. Buyer approval of
+      payment is required; the provider states agents must not complete payment without it.
+  - name: cancel_checkout
+    category: checkout
+    read_only: false
+    reversal_of: create_checkout
+    description: Cancels a checkout.
+  - name: get_order
+    category: order
+    read_only: true
+    description: Get the details of an order by gid://shopify/Order/{id}.
+conventions_observed:
+  money: >-
+    All prices are integers in ISO 4217 minor units paired with a currency code
+    ({"amount": 600, "currency": "USD"} is $6.00). Stated verbatim in every tool description.
+  identifiers: Shopify global ids, e.g. gid://shopify/Checkout/abc123, gid://shopify/Order/123.
+  required_meta: >-
+    Every tool requires meta["ucp-agent"]["profile"], a URI naming the calling agent's UCP profile.
+    This is the server's agent-identity requirement and it is enforced.
+x-evidence:
+  fetched: '2026-09-05'
+  requests:
+    - url: https://zbiotics.com/api/ucp/mcp
+      method: POST
+      body: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+      http_status: 200
+      content_type: application/json; charset=utf-8
+      bytes: 52135
+    - url: https://zbiotics.com/api/ucp/mcp
+      method: POST
+      body: '{"jsonrpc":"2.0","id":2,"method":"initialize"}'
+      http_status: 200
+    - url: https://zbiotics.myshopify.com/api/ucp/mcp
+      method: POST
+      body: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+      http_status: 200

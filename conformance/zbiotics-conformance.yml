@@ -1,0 +1,131 @@
+generated: '2026-09-05'
+method: probed
+source: >-
+  https://zbiotics.com/.well-known/ucp.json, https://zbiotics.com/.well-known/openid-configuration,
+  https://zbiotics.com/.well-known/oauth-protected-resource, https://zbiotics.com/api/ucp/mcp
+summary: >-
+  Every assertion below was read out of a document ZBiotics actually serves, not out of a
+  marketing claim. The store declares Universal Commerce Protocol conformance by capability URN in
+  its own /.well-known/ucp.json, speaks MCP 2025-06-18 over JSON-RPC 2.0 on its own domain, and
+  serves OIDC / RFC 8414 / RFC 9728 discovery. It publishes no compliance certifications, no trust
+  centre, and no security disclosure policy.
+conformance:
+- id: ucp
+  name: Universal Commerce Protocol
+  version: '2026-08-25'
+  conforms: true
+  evidence: https://zbiotics.com/.well-known/ucp.json
+  detail: >-
+    The manifest declares service dev.ucp.shopping at 2026-08-25 over transport mcp, plus the
+    capability URNs dev.ucp.shopping.checkout, .fulfillment, .discount, .cart, .order,
+    .catalog.search and .catalog.lookup, and the Shopify extension dev.shopify.catalog. Prior
+    versions 2026-04-08 and 2026-01-23 remain reachable at versioned well-known paths.
+- id: mcp
+  name: Model Context Protocol
+  version: '2025-06-18'
+  conforms: true
+  evidence: https://zbiotics.com/api/ucp/mcp
+  detail: >-
+    initialize returned protocolVersion 2025-06-18 and serverInfo universal-commerce/0.1.0 with
+    tools, prompts, resources and logging capabilities. tools/list returned 13 tools.
+- id: jsonrpc2
+  name: JSON-RPC 2.0
+  conforms: true
+  evidence: https://zbiotics.com/api/ucp/mcp
+  detail: All requests and responses carry jsonrpc "2.0"; errors use the {code,message,data} object.
+- id: json-schema-2020-12
+  name: JSON Schema 2020-12
+  conforms: true
+  evidence: https://zbiotics.com/api/ucp/mcp
+  detail: >-
+    Every tool inputSchema declares
+    $schema https://json-schema.org/draft/2020-12/schema and uses allOf/if/then/else conditionals
+    (the apple-pay payment-instrument branch in create_checkout).
+- id: oidc
+  name: OpenID Connect Discovery 1.0
+  conforms: true
+  evidence: https://zbiotics.com/.well-known/openid-configuration
+  detail: issuer, authorization_endpoint, token_endpoint, jwks_uri, RS256 id tokens, claims_supported.
+- id: oauth2
+  name: OAuth 2.0 Authorization Server Metadata (RFC 8414)
+  conforms: true
+  evidence: https://zbiotics.com/.well-known/oauth-authorization-server
+- id: oauth2-protected-resource
+  name: OAuth 2.0 Protected Resource Metadata (RFC 9728)
+  conforms: true
+  evidence: https://zbiotics.com/.well-known/oauth-protected-resource
+  detail: Declares resource https://zbiotics.com and two authorization_servers; bearer_methods_supported header.
+- id: pkce
+  name: PKCE (RFC 7636)
+  conforms: true
+  evidence: https://zbiotics.com/.well-known/openid-configuration
+  detail: code_challenge_methods_supported is ["S256"]; the plain method is not offered.
+- id: iso4217-minor-units
+  name: ISO 4217 minor-unit money representation
+  conforms: true
+  evidence: https://zbiotics.com/api/ucp/mcp
+  detail: >-
+    Every price is an integer in minor units paired with a currency code, and each tool
+    description states the rule explicitly rather than leaving it implicit.
+- id: bcp47
+  name: IETF BCP 47 language tags
+  conforms: true
+  evidence: https://zbiotics.com/api/ucp/mcp
+  detail: catalog.context.language is documented as a BCP 47 tag.
+- id: iso3166-1-alpha2
+  name: ISO 3166-1 alpha-2 country codes
+  conforms: true
+  evidence: https://zbiotics.com/api/ucp/mcp
+  detail: catalog.context.address_country is documented as ISO 3166-1 alpha-2.
+- id: rfc9116-security-txt
+  name: security.txt (RFC 9116)
+  conforms: false
+  evidence: https://zbiotics.com/.well-known/security.txt
+  detail: 404 on all four probed hosts.
+- id: rfc9457-problem-details
+  name: Problem Details for HTTP APIs (RFC 9457)
+  conforms: false
+  evidence: https://zbiotics.com/api/ucp/mcp
+  detail: >-
+    Errors are JSON-RPC error objects, not application/problem+json. This is correct for MCP and
+    is recorded as a not-applicable-shaped false rather than a defect.
+- id: openapi
+  name: OpenAPI
+  conforms: false
+  evidence: https://zbiotics.com/openapi.json
+  detail: >-
+    404. No OpenAPI, Swagger, AsyncAPI, GraphQL SDL, .proto or WSDL is published on any ZBiotics
+    host. The machine-readable contract for this provider is the MCP tools/list document.
+- id: a2a
+  name: A2A Agent Card
+  conforms: false
+  evidence: https://zbiotics.com/.well-known/agent-card.json
+  detail: 404 at both the canonical and the legacy /.well-known/agent.json path on all hosts.
+domain_standard:
+  market: agentic commerce / retail checkout
+  standard: Universal Commerce Protocol (UCP), service dev.ucp.shopping
+  declared_in_contract: true
+  signature: >-
+    The provider's own /.well-known/ucp.json declares versioned capability URNs under the
+    dev.ucp.shopping namespace and binds each to its published schema on ucp.dev - the contract
+    declares the domain standard for its own market rather than a page claiming it in prose. The
+    MCP endpoint corroborates it: tool names (create_checkout, update_checkout, complete_checkout,
+    create_cart, search_catalog, lookup_catalog, get_order) are the UCP shopping vocabulary, and
+    the response header x-shopify-ucp-mcp-api-version carries the dated protocol version.
+  evidence: https://zbiotics.com/.well-known/ucp.json
+  payment_handlers_declared:
+  - id: com.google.pay
+    version: '2026-01-11'
+  - id: dev.shopify.card
+    version: '2026-01-15'
+  - id: dev.shopify.shop_pay
+    version: '2026-04-08'
+compliance_certifications: []
+compliance_note: >-
+  No SOC 2, ISO 27001, PCI DSS, HIPAA or FedRAMP claim is published on any ZBiotics page, and no
+  trust centre exists (probe-security-programs.py returned vdp=none trust=none on 2026-09-05).
+  No Compliance pointer is emitted. The company's regulated surface is food/supplement labelling
+  (it publishes bioengineered-food-labelling and product-quality pages), not information-security
+  certification.
+x-evidence:
+  fetched: '2026-09-05'

@@ -1,0 +1,46 @@
+generated: '2026-09-05'
+method: probed
+source: https://zbiotics.com/.well-known/openid-configuration
+docs: null
+summary: >-
+  Four OAuth scopes are advertised by the OIDC discovery document served on zbiotics.com and
+  account.zbiotics.com. They belong to the Shopify Customer Accounts identity that ZBiotics runs
+  on its own hosts, not to the anonymous UCP MCP commerce endpoint, which requires no scope. There
+  is no published scope reference page on the ZBiotics site - the discovery document is the only
+  place these are stated, so descriptions below are the standard meanings and are marked as such.
+flows:
+- type: authorization_code
+  authorization_url: https://account.zbiotics.com/authentication/oauth/authorize
+  token_url: https://account.zbiotics.com/authentication/oauth/token
+  pkce: S256
+scope_count: 4
+scopes:
+- name: openid
+  description: Standard OIDC scope requesting an ID token for the authenticated customer.
+  source: scopes_supported
+  description_source: rfc-standard
+- name: email
+  description: Releases the customer's email and email_verified claims.
+  source: scopes_supported
+  description_source: rfc-standard
+- name: customer-account-api:full
+  description: >-
+    Full access to the Shopify Customer Account API for the signed-in customer - orders,
+    addresses, subscriptions and profile on this store.
+  source: scopes_supported
+  description_source: vendor-naming-convention
+- name: customer-account-mcp-api:full
+  description: >-
+    Full access to the Customer Account MCP API for the signed-in customer. This is the
+    authenticated counterpart to the anonymous storefront UCP MCP endpoint; it was not probed
+    because doing so requires a customer credential.
+  source: scopes_supported
+  description_source: vendor-naming-convention
+gaps:
+- >-
+  No scopes/permissions reference page exists on zbiotics.com. Descriptions above are inferred
+  from the scope names and the OIDC specification, not read from provider prose.
+x-evidence:
+  fetched: '2026-09-05'
+  url: https://zbiotics.com/.well-known/openid-configuration
+  http_status: 200

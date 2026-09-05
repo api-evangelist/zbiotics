@@ -1,0 +1,139 @@
+generated: '2026-09-05'
+method: probed
+source: >-
+  https://zbiotics.com/api/ucp/mcp (tools/list + initialize), https://zbiotics.com/llms.txt,
+  https://zbiotics.com/agents.md, https://zbiotics.com/.well-known/ucp.json
+summary: >-
+  Cross-cutting runtime semantics for the ZBiotics UCP MCP surface, read from the live tool
+  schemas and the provider's own agent instructions. This is a JSON-RPC 2.0 / MCP surface, so
+  several HTTP-shaped conventions (pagination links, problem+json, rate-limit headers) do not
+  exist here; where that is the reason, it is said rather than left blank.
+auth:
+  style: none-for-commerce, oidc-for-customer-accounts
+  detail: >-
+    The MCP endpoint accepts anonymous POSTs. Identity is asserted, not authenticated: every tool
+    requires meta["ucp-agent"]["profile"], a URI naming the agent's own UCP profile. Customer
+    accounts use OIDC authorization_code + PKCE S256 against account.zbiotics.com.
+  see: authentication/zbiotics-authentication.yml
+idempotency:
+  coverage: none
+  supported: false
+  header: null
+  scope: []
+  retention: null
+  detail: >-
+    No Idempotency-Key header, no client-supplied request id, and no idempotency field appears in
+    any of the 13 tool inputSchemas. The mutating tools are create_cart, update_cart, cancel_cart,
+    create_checkout, update_checkout, complete_checkout and cancel_checkout - seven write
+    operations, none of which offers replay protection. An agent that retries complete_checkout
+    after a timeout has no documented guarantee against a second order. The JSON-RPC "id" field is
+    a correlation id for the response, not a deduplication key, and must not be read as one.
+  evidence: https://zbiotics.com/api/ucp/mcp
+reversibility:
+  grade: documented
+  detail: >-
+    Reversal operations exist for both mutable objects, but no reversal WINDOW is stated anywhere
+    the provider publishes, so this grades documented rather than verified.
+  write_surfaces:
+  - operation: create_cart
+    reversal: cancel_cart
+    window: null
+    window_source: null
+  - operation: create_checkout
+    reversal: cancel_checkout
+    window: null
+    window_source: null
+  - operation: complete_checkout
+    reversal: null
+    window: null
+    detail: >-
+      There is no cancel_order, refund or void tool. Once complete_checkout succeeds an order
+      exists and the MCP surface offers no way to undo it - get_order is the only order tool. The
+      only reversal path is the human refund policy at
+      https://zbiotics.com/pages/refund-policy, which is a customer-service process, not an API
+      operation, and this artifact does not restate its terms because doing so would assert a
+      window on the provider's behalf.
+  note: >-
+    This is the sharpest agent-safety gap on the surface: the one irreversible operation
+    (complete_checkout) is also the one that spends the buyer's money, and it is unprotected by
+    idempotency. The provider's own mitigation is procedural - llms.txt states that agents must
+    not complete payment without contemporaneous buyer approval.
+dry_run_mode:
+  supported: false
+  detail: >-
+    No test mode, no simulation flag and no sandbox store. create_checkout against this endpoint
+    creates a real checkout on the live store.
+pagination:
+  style: none-observed
+  detail: >-
+    search_catalog and lookup_catalog expose query, filters and context but no cursor, page, limit
+    or offset parameter in their inputSchemas. lookup_catalog is bounded instead - catalog.ids has
+    minItems 1 and maxItems 10. Result-set paging is therefore not available to an agent.
+field_expansion:
+  supported: false
+  detail: No sparse-fieldset or expand parameter; get_product returns complete product detail by design.
+metadata:
+  supported: true
+  field: meta
+  detail: >-
+    meta is a required top-level object on every tool, carrying meta["ucp-agent"]["profile"]. It
+    is protocol metadata, not free-form customer metadata; there is no arbitrary key/value store.
+request_id_tracing:
+  supported: true
+  detail: >-
+    Responses carry x-request-id (observed d1bda922-f9b0-468d-8ff8-287cb4f147b8-1788603090) and a
+    server-timing header with requestID, processing, db and edge fields. JSON-RPC id echoes the
+    request id. No trace-id / traceparent header was observed.
+versioning:
+  style: dated-protocol-version
+  current: '2026-08-25'
+  detail: >-
+    The UCP protocol version is the version of this surface. It is echoed on every MCP response as
+    x-shopify-ucp-mcp-api-version: 2026-08-25, and the well-known manifest lists two prior dated
+    versions still served at versioned paths. There is no /v1/ path segment and no version
+    request header.
+  see: lifecycle/zbiotics-lifecycle.yml
+error_envelope:
+  shape: jsonrpc-error-object
+  detail: >-
+    {"jsonrpc":"2.0","id":<n>,"error":{"code":<int>,"message":<string>,"data":{"code":<slug>,
+    "content":<string>,"continue_url":<url>}}}. The data object is the useful half - it carries a
+    machine-readable slug and, for recoverable states, a continue_url pointing the agent (or the
+    buyer) at where to resolve it. HTTP status stays 200 on an application error.
+  see: errors/zbiotics-problem-types.yml
+rate_limit_signaling:
+  documented: true
+  headers: []
+  detail: >-
+    llms.txt states "The MCP endpoint is rate-limited per IP. Back off on 429 responses." No
+    RateLimit-*, X-RateLimit-* or Retry-After header appeared on any observed response, and six
+    consecutive tools/list calls all returned 200, so no limit was reached and no runtime signal
+    is available to an agent before it is refused. Shopify-complexity-score (34 for tools/list) is
+    present but is a cost meter with no published budget.
+  see: rate-limits/zbiotics-rate-limits.yml
+money:
+  representation: integer-minor-units
+  detail: >-
+    {"amount": 600, "currency": "USD"} is $6.00. The rule is repeated verbatim in the description
+    of every checkout and cart tool, including the instruction to convert before quoting a price
+    to a buyer and the zero-decimal-currency caveat. This is unusually careful for an agent
+    surface and worth recording as a strength.
+identifiers:
+  style: shopify-global-id
+  examples: ['gid://shopify/Checkout/abc123', 'gid://shopify/Order/123']
+  detail: Product and variant ids are opaque strings supplied by catalog tools; agents must not construct them.
+human_in_the_loop:
+  required: true
+  detail: >-
+    "Checkout requires human approval. Agents must not complete payment without explicit buyer
+    consent." Stated in llms.txt and agents.md. The provider offers a fallback for agents that
+    cannot obtain contemporaneous approval - route the purchase through Shop Pay via the Shop
+    skill instead.
+  source: https://zbiotics.com/llms.txt
+x-evidence:
+  fetched: '2026-09-05'
+  probes:
+  - url: https://zbiotics.com/api/ucp/mcp
+    http_status: 200
+  - url: https://zbiotics.com/llms.txt
+    http_status: 200

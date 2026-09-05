@@ -1,0 +1,92 @@
+generated: '2026-09-05'
+method: probed
+source: https://zbiotics.com/api/ucp/mcp
+format: jsonrpc-error
+summary: >-
+  ZBiotics publishes no error reference page, so this catalogue was built by driving the live UCP
+  MCP endpoint with deliberately malformed and unauthorised requests and recording exactly what
+  came back. Every entry below is an observed response, quoted verbatim. The surface is JSON-RPC
+  2.0, not RFC 9457 - errors are error objects, not application/problem+json.
+envelope:
+  shape: |
+    {"jsonrpc":"2.0","id":<n>,"error":{"code":<int>,"message":<string>,"data":<object|string>}}
+  fields:
+    code: JSON-RPC integer code. Standard (-32600 family) and implementation-defined (-32000, -32001).
+    message: Short human-readable class name.
+    data: >-
+      Either a plain string (protocol-level errors) or an object carrying code (a machine-readable
+      slug), content (human detail) and continue_url (where to resolve the condition).
+  http_status_note: >-
+    Unlike most JSON-RPC servers this one does NOT pin HTTP 200. Observed statuses map onto error
+    classes - 400 for invalid JSON, 403 for AuthenticationRequired, 422 for UCP discovery failure -
+    so an agent can branch on the status before parsing.
+problem_type_count: 4
+problem_types:
+- code: -32600
+  slug: null
+  message: Invalid Request
+  http_status: 400
+  data: Invalid JSON in request body.
+  cause: The POST body did not parse as JSON.
+  remediation: Fix the JSON serialisation; nothing about the store state is implied.
+  observed: true
+- code: -32001
+  slug: invalid_profile_url
+  message: UCP discovery failed
+  http_status: 422
+  data_content: 'Unable to fetch agent profile: Missing profile uri'
+  continue_url: https://zbiotics.myshopify.com/
+  cause: >-
+    meta["ucp-agent"]["profile"] was absent. This is returned for ANY method once the request is
+    past parsing - including tools/call, prompts/list and resources/list, and including method
+    names that do not exist, so it masks a would-be method-not-found.
+  remediation: Supply a reachable UCP agent profile URI in meta["ucp-agent"]["profile"].
+  observed: true
+- code: -32001
+  slug: profile_unreachable
+  message: UCP discovery failed
+  http_status: 422
+  data_content: 'Unable to fetch agent profile: Http error'
+  continue_url: https://zbiotics.myshopify.com/
+  cause: >-
+    The supplied profile URI was well formed but the server could not fetch it. The store performs
+    a live outbound GET of the agent's profile document on every tools/call.
+  remediation: Publish and serve the agent profile document at the URI supplied, then retry.
+  observed: true
+- code: -32000
+  slug: null
+  message: AuthenticationRequired
+  http_status: 403
+  data: >-
+    Unauthorized: A valid JWT is required to call get_order. See
+    https://shopify.dev/docs/agents/get-started/authentication for instructions on generating a
+    token and authenticating your requests.
+  cause: >-
+    An order-scoped tool was called without a customer-account JWT. The message names the exact
+    tool and links the platform's authentication documentation, which is the only place on this
+    surface where a credential-acquisition path is stated.
+  remediation: >-
+    Obtain a customer-account token via the OIDC flow at account.zbiotics.com (scope
+    customer-account-mcp-api:full) and present it, then retry get_order.
+  observed: true
+surface_findings:
+- >-
+  tools/list is genuinely anonymous, but tools/call is not open - it requires a resolvable
+  ucp-agent profile document, and order-scoped tools require a JWT on top of that. The surface is
+  therefore anonymous for DISCOVERY and gated for INVOCATION.
+- >-
+  There is no distinct method-not-found error. An unknown method (nope/list) returned the same
+  -32001 invalid_profile_url as a valid method missing its meta block, so an agent cannot
+  distinguish a typo from a missing profile.
+- >-
+  No 429 was reachable in this probe. Six consecutive tools/list calls all returned 200 with no
+  rate-limit headers, so the documented rate limit could not be characterised.
+gaps:
+- No published error reference page on any ZBiotics host.
+- >-
+  Error slugs are only discoverable by triggering them; there is no enumeration of data.code values.
+x-evidence:
+  fetched: '2026-09-05'
+  method: adversarial probing of the live endpoint with malformed and unauthorised requests
+  url: https://zbiotics.com/api/ucp/mcp
+  requests_issued: 5

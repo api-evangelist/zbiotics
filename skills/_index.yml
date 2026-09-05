@@ -1,0 +1,43 @@
+generated: '2026-09-05'
+method: generated
+source: mcp/zbiotics-mcp-tools.json (live tools/list, fetched 2026-09-05), https://zbiotics.com/llms.txt
+summary: >-
+  Two packaged Agent Skills for the ZBiotics UCP MCP surface, grounded in the 13 real tool names
+  and input schemas returned by the live endpoint. There is no OpenAPI for this provider, so the
+  MCP tools/list document is what the operations were verified against - no operation named in
+  either skill is absent from it.
+grounded_in:
+  document: mcp/zbiotics-mcp-tools.json
+  tool_count: 13
+  every_named_operation_verified: true
+provider_published_skills:
+  found: false
+  note: >-
+    ZBiotics publishes no skills/ directory and no AGENTS.md. Its /agents.md and /llms.txt are
+    agent INSTRUCTIONS (captured verbatim at llms/) and they recommend a third-party skill,
+    https://shop.app/SKILL.md, which belongs to Shopify and is deliberately not vendored here.
+skills:
+- name: zbiotics-catalog-browse
+  file: zbiotics-catalog-browse.md
+  read_only: true
+  operations: [search_catalog, lookup_catalog, get_product]
+  summary: Find products and read detail without mutating state or spending money.
+- name: zbiotics-agent-purchase
+  file: zbiotics-agent-purchase.md
+  read_only: false
+  irreversible_operations: [complete_checkout]
+  operations:
+  - search_catalog
+  - create_cart
+  - get_cart
+  - update_cart
+  - cancel_cart
+  - create_checkout
+  - get_checkout
+  - update_checkout
+  - complete_checkout
+  - cancel_checkout
+  - get_order
+  summary: >-
+    The full purchase flow, with the provider's human-approval requirement, the absence of
+    idempotency, and the irreversibility of complete_checkout stated up front rather than buried.

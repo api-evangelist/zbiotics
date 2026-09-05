@@ -1,0 +1,145 @@
+generated: '2026-09-05'
+method: derived
+source: mcp/zbiotics-mcp-tools.json
+summary: >-
+  Entity graph derived from the JSON Schema 2020-12 inputSchemas returned by the live UCP MCP
+  tools/list document. There is no OpenAPI to read $refs from, so relationships were taken from
+  the id-reference fields and nested object shapes the tool schemas actually declare. Response
+  schemas are not published (MCP tools carry inputSchema only), so entity ATTRIBUTES below are
+  those an agent can send; fields that only appear in responses are marked as inferred from tool
+  descriptions and are labelled.
+derived_from:
+  document: mcp/zbiotics-mcp-tools.json
+  tools_read: 13
+  caveat: >-
+    inputSchema only. Nothing here was taken from a response body, because completing a checkout
+    to observe one would place a real order on a live store.
+identifier_conventions:
+  style: shopify-global-id
+  patterns:
+  - entity: Checkout
+    pattern: 'gid://shopify/Checkout/{id}'
+    source: get_checkout.inputSchema.properties.id.description
+  - entity: Order
+    pattern: 'gid://shopify/Order/{id}'
+    source: get_order.inputSchema.properties.id.description
+  - entity: ProductVariant
+    pattern: opaque string
+    source: create_cart.inputSchema cart.line_items.items.item.id ("The Product Variant ID to add or update")
+  rule: >-
+    Ids are opaque and issued by the store. An agent obtains a variant id from a catalog tool and
+    a checkout/order id from the tool that created it; none may be constructed.
+entities:
+- name: Agent
+  description: The calling agent, identified by a dereferenceable UCP profile URI.
+  fields:
+  - {name: profile, type: string, format: uri, required: true, note: 'meta["ucp-agent"].profile; fetched live by the store on every tools/call'}
+  appears_in: all 13 tools
+- name: Product
+  description: A ZBiotics catalogue product.
+  fields:
+  - {name: id, type: string, required: true}
+  retrieved_by: [search_catalog, lookup_catalog, get_product]
+  note: lookup_catalog accepts 1-10 ids per call (minItems 1, maxItems 10).
+- name: ProductVariant
+  description: A purchasable pack size or flavour of a Product.
+  fields:
+  - {name: id, type: string, required: true}
+  note: The unit a LineItem references. Retail variants are enumerated in plans/zbiotics-plans-pricing.yml.
+- name: LineItem
+  description: A quantity of one ProductVariant inside a Cart or Checkout.
+  fields:
+  - {name: id, type: string, required: false, note: present when updating an existing line}
+  - {name: quantity, type: integer, required: true}
+  - {name: 'item.id', type: string, required: true, note: the ProductVariant id}
+- name: Buyer
+  description: Contact identity attached to a Cart or Checkout.
+  fields:
+  - {name: email, type: string, format: email}
+  - {name: phone_number, type: string}
+  additional_properties: true
+- name: BuyerContext
+  description: >-
+    Provisional localisation and pricing hints. The schema states that higher-resolution
+    authoritative data (a real shipping address) supersedes these and that unsupported hints may
+    be ignored without error.
+  fields:
+  - {name: address_country, type: string, note: ISO 3166-1 alpha-2}
+  - {name: address_region, type: string}
+  - {name: postal_code, type: string}
+  - {name: language, type: string, note: IETF BCP 47}
+  - {name: currency, type: string, note: ISO 4217}
+  - {name: intent, type: string}
+- name: Signals
+  description: Platform environment data passed with catalog calls.
+  fields:
+  - {name: 'dev.ucp.buyer_ip', type: string}
+  - {name: 'dev.ucp.user_agent', type: string}
+- name: Cart
+  description: A mutable collection of LineItems before checkout.
+  created_by: create_cart
+  read_by: get_cart
+  updated_by: update_cart
+  cancelled_by: cancel_cart
+- name: Checkout
+  description: >-
+    A priced, addressable purchase in progress carrying line items, totals, discounts, taxes,
+    fulfillment selection and payment instruments.
+  created_by: create_checkout
+  read_by: get_checkout
+  updated_by: update_checkout
+  completed_by: complete_checkout
+  cancelled_by: cancel_checkout
+- name: PaymentInstrument
+  description: >-
+    A payment method attached to a Checkout. The schema is conditional: handler_id "apple-pay"
+    requires billing_address and an apple_pay_token credential with payment_data; every other
+    handler requires credential.token and credential.type.
+  fields:
+  - {name: id, type: string, required: true}
+  - {name: handler_id, type: string, required: true}
+  - {name: type, type: string, required: true}
+  - {name: billing_address, type: object, required: conditional}
+  - {name: credential, type: object, required: conditional}
+  handlers_declared: [com.google.pay, dev.shopify.card, dev.shopify.shop_pay]
+  handlers_source: well-known/zbiotics-ucp.json
+- name: Money
+  description: An amount and a currency.
+  fields:
+  - {name: amount, type: integer, note: minor units, e.g. 600 is $6.00}
+  - {name: currency, type: string, note: ISO 4217}
+  note: Used for catalog.filters.price.min/max and for every total quoted back to the agent.
+- name: Order
+  description: The record created when a Checkout completes. Terminal - no reversal tool exists.
+  read_by: get_order
+  auth: requires a customer-account JWT (observed 403 -32000 AuthenticationRequired anonymously)
+relationships:
+- {from: Cart, to: LineItem, type: has_many, via: cart.line_items}
+- {from: Checkout, to: LineItem, type: has_many, via: checkout.line_items}
+- {from: LineItem, to: ProductVariant, type: belongs_to, via: item.id}
+- {from: ProductVariant, to: Product, type: belongs_to, via: catalog lookup}
+- {from: Cart, to: Buyer, type: has_one, via: cart.buyer}
+- {from: Checkout, to: Buyer, type: has_one, via: checkout.buyer}
+- {from: Cart, to: BuyerContext, type: has_one, via: cart.context}
+- {from: Checkout, to: PaymentInstrument, type: has_many, via: checkout.payment.instruments}
+- {from: Checkout, to: Order, type: has_one, via: complete_checkout, note: creation, not a stored reference}
+- {from: LineItem, to: Money, type: has_one, via: totals, note: inferred from tool descriptions, not from inputSchema}
+lifecycle_graph:
+  states:
+  - Cart created -> updated -> (cancelled | promoted to Checkout)
+  - Checkout created -> updated -> (cancelled | completed)
+  - Order created by complete_checkout -> terminal
+  irreversible_step: complete_checkout
+  note: See conventions/zbiotics-conventions.yml reversibility - there is no order-level reversal tool.
+gaps:
+- >-
+  No response schemas are published. An agent learns a response shape by calling, which for the
+  checkout tools means mutating live state.
+- >-
+  No object reference page exists on any ZBiotics host; entity names above are the tool
+  vocabulary, not the provider's published domain glossary.
+x-evidence:
+  derived_on: '2026-09-05'
+  from: mcp/zbiotics-mcp-tools.json
+  source_fetched: '2026-09-05'
+  source_url: https://zbiotics.com/api/ucp/mcp

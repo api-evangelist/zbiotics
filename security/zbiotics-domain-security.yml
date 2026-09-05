@@ -1,0 +1,17 @@
+generated: '2026-09-05'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: zbiotics.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct 26 18:33:34 2026 GMT
+  hsts: true
+  hsts_max_age: 7889238
+domains:
+- domain: zbiotics.com
+  dnssec: false
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: none

@@ -64,5 +64,18 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-ZBiotics is a company surfaced via the API Evangelist harvest backlog (source: secondary-market) and added to the network as a stub for full-pipeline profiling.
-- https://www.hiive.com/securities/zbiotics-stock
+ZBiotics is a San Francisco biotechnology company making the world's first genetically engineered
+probiotics, sold direct to consumers — Pre-Alcohol (B. subtilis ZB183, engineered to break down
+acetaldehyde) and Sugar-to-Fiber.
+
+It runs no developer program and publishes no OpenAPI, GraphQL schema, SDK or CLI. Its API surface
+is an agentic-commerce one, and it is a real one: a live Model Context Protocol server at
+`https://zbiotics.com/api/ucp/mcp` implementing the Universal Commerce Protocol `dev.ucp.shopping`
+service at version 2026-08-25, answering `tools/list` anonymously with 13 catalog, cart, checkout
+and order tools; a `/.well-known/ucp.json` merchant manifest; OIDC, RFC 8414 and RFC 9728 discovery
+documents; and first-party `/llms.txt` and `/agents.md` agent instructions.
+
+- Store / website: https://zbiotics.com/
+- Agent instructions: https://zbiotics.com/agents.md
+- UCP manifest: https://zbiotics.com/.well-known/ucp.json
+- MCP endpoint: https://zbiotics.com/api/ucp/mcp

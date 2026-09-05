@@ -1,0 +1,58 @@
+generated: '2026-09-05'
+method: probed
+source: https://zbiotics.com/llms.txt, https://zbiotics.com/api/ucp/mcp
+docs: https://zbiotics.com/llms.txt
+summary: >-
+  A rate limit is asserted in prose and could not be characterised in practice. ZBiotics' llms.txt
+  tells agents the MCP endpoint is rate-limited per IP and to back off on 429, but publishes no
+  number, no window and no burst, and the endpoint returns no rate-limit headers. An agent gets
+  one runtime signal - a 429, after the fact.
+limit_count: 0
+limits:
+- scope: per-ip
+  surface: https://zbiotics.com/api/ucp/mcp
+  window: null
+  limit: null
+  burst: null
+  status_on_exhaustion: 429
+  documented: true
+  quantified: false
+  source: https://zbiotics.com/llms.txt
+  quote: 'Respect rate limits. The MCP endpoint is rate-limited per IP. Back off on 429 responses.'
+response_headers:
+  ratelimit_standard: []
+  x_ratelimit: []
+  retry_after: false
+  observed: []
+  detail: >-
+    No RateLimit-Limit / RateLimit-Remaining / RateLimit-Reset (RFC 9239-style), no X-RateLimit-*,
+    and no Retry-After appeared on any response. Six consecutive tools/list POSTs all returned 200
+    and none carried a limit header, so no limit was reached and none is advertised in advance.
+cost_signal:
+  header: shopify-complexity-score
+  also: shopify-complexity-score-v2
+  observed:
+  - request: 'POST /api/ucp/mcp tools/list'
+    value: 34
+  - request: 'GET /'
+    value: 274
+  detail: >-
+    A per-request cost meter is returned, but no budget, bucket size or refill rate is published
+    against it, so an agent cannot compute headroom from it. Recorded as a cost signal, not as a
+    rate limit.
+gaps:
+- No numeric limit, window or burst is published anywhere on a ZBiotics host.
+- No pre-emptive header, so an agent cannot slow down before being refused.
+- >-
+  limit_count is 0 deliberately: a stated existence of a limit is not a limit an agent can plan
+  against, and recording a fabricated number to fill the field would be worse than the gap.
+x-evidence:
+  fetched: '2026-09-05'
+  probes:
+  - url: https://zbiotics.com/api/ucp/mcp
+    method: POST
+    repetitions: 6
+    http_statuses: [200, 200, 200, 200, 200, 200]
+    rate_limit_headers_seen: none
+  - url: https://zbiotics.com/llms.txt
+    http_status: 200

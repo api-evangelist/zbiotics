@@ -1,18 +1,57 @@
 aid: zbiotics
 name: ZBiotics
-description: 'ZBiotics is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  ZBiotics is a San Francisco biotechnology company that makes the world's first genetically
+  engineered probiotics, sold direct to consumers - Pre-Alcohol, a drink containing the patented
+  B. subtilis ZB183 strain engineered to break down acetaldehyde after drinking, and Sugar-to-Fiber,
+  which converts dietary sugar into fiber in the gut. It publishes no developer program, no
+  OpenAPI and no SDKs, but its storefront is a fully instrumented agentic-commerce surface: an
+  anonymous Model Context Protocol server at zbiotics.com/api/ucp/mcp implementing the Universal
+  Commerce Protocol dev.ucp.shopping service with 13 catalog, cart, checkout and order tools; a
+  /.well-known/ucp.json merchant manifest; OIDC and RFC 9728 discovery documents for customer
+  accounts; and a first-party /llms.txt and /agents.md that tell agents how to transact.
+image: https://zbiotics.com/cdn/shop/files/zbiotics-logo.svg?v=1714027569
 url: https://raw.githubusercontent.com/api-evangelist/zbiotics/refs/heads/main/apis.yml
+position: Producing
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
 specificationVersion: '0.20'
 created: '2026-09-05'
 modified: '2026-09-05'
 tags:
+- Biotechnology
+- Probiotics
+- Consumer Health
+- Direct to Consumer
+- E-Commerce
+- Agentic Commerce
+- Model Context Protocol
+- Universal Commerce Protocol
+- Shopify
 - Company
-apis: []
+apis:
+- name: ZBiotics Universal Commerce MCP API
+  description: >-
+    The anonymous Model Context Protocol endpoint ZBiotics serves on its own domain, implementing
+    the Universal Commerce Protocol dev.ucp.shopping service at version 2026-08-25. tools/list
+    answers without credentials and returns 13 tools with full JSON Schema 2020-12 input schemas -
+    search_catalog, lookup_catalog, get_product, create/get/update/cancel_cart, create/get/update/
+    complete/cancel_checkout and get_order - operating on the ZBiotics retail catalog. Every call
+    requires meta["ucp-agent"].profile, and the provider states that completing a checkout
+    requires contemporaneous buyer approval of payment.
+  humanURL: https://zbiotics.com/agents.md
+  baseURL: https://zbiotics.com/api/ucp/mcp
+  image: https://zbiotics.com/cdn/shop/files/zbiotics-logo.svg?v=1714027569
+  tags:
+  - Agentic Commerce
+  - Model Context Protocol
+  - Universal Commerce Protocol
+  - E-Commerce
+  - Catalog
+  - Checkout
+  properties:
+  - type: MCPServer
+    url: mcp/zbiotics-mcp.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -20,4 +59,55 @@ maintainers:
   email: info@apis.io
 common:
 - type: Website
-  url: https://www.hiive.com/securities/zbiotics-stock
+  url: https://zbiotics.com/
+- type: Documentation
+  url: https://zbiotics.com/agents.md
+- type: Support
+  url: https://zbiotics.com/pages/faqs
+- type: Blog
+  url: https://zbiotics.com/blogs/journal
+- type: BlogRSS
+  url: https://zbiotics.com/blogs/journal.atom
+- type: Pricing
+  url: https://zbiotics.com/products/zbiotics
+- type: SignUp
+  url: https://zbiotics.com/a/account/login
+- type: TermsOfService
+  url: https://zbiotics.com/pages/terms-of-use
+- type: PrivacyPolicy
+  url: https://zbiotics.com/pages/privacy-policy
+- type: MCPServer
+  url: mcp/zbiotics-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/zbiotics-tool-crosswalk.yml
+- type: LLMsTxt
+  url: llms/zbiotics-llms.txt
+- type: WellKnown
+  url: well-known/zbiotics-well-known.yml
+- type: Authentication
+  url: authentication/zbiotics-authentication.yml
+- type: OAuthScopes
+  url: scopes/zbiotics-scopes.yml
+- type: Conformance
+  url: conformance/zbiotics-conformance.yml
+- type: Conventions
+  url: conventions/zbiotics-conventions.yml
+- type: ErrorCatalog
+  url: errors/zbiotics-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/zbiotics-lifecycle.yml
+- type: DataModel
+  url: data-model/zbiotics-data-model.yml
+- type: Plans
+  url: plans/zbiotics-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/zbiotics-rate-limits.yml
+- type: DomainSecurity
+  url: security/zbiotics-domain-security.yml
+- type: AgentSkill
+  url: skills/_index.yml
+x-enrichment:
+  date: '2026-09-05'
+  status: enriched
+  artifacts_added: 24
+  pass: local-v3

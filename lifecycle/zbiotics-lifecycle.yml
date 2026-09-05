@@ -1,0 +1,75 @@
+generated: '2026-09-05'
+method: probed
+source: >-
+  https://zbiotics.com/.well-known/ucp.json, https://zbiotics.com/api/ucp/mcp,
+  https://zbiotics.com/llms.txt
+summary: >-
+  ZBiotics publishes no API versioning policy, no deprecation policy, no SLA and no status page of
+  its own. What it does publish is a dated protocol version, and it keeps two superseded versions
+  addressable - which is a de facto version policy inherited from the Universal Commerce Protocol
+  rather than authored by the company.
+versioning:
+  scheme: dated-protocol-version
+  current: '2026-08-25'
+  location: >-
+    Declared in /.well-known/ucp.json as ucp.version, and echoed on every MCP response as the
+    header x-shopify-ucp-mcp-api-version.
+  in_path: false
+  in_header: true
+  header: x-shopify-ucp-mcp-api-version
+  supported_versions:
+  - version: '2026-08-25'
+    status: current
+    manifest: https://zbiotics.com/.well-known/ucp.json
+  - version: '2026-04-08'
+    status: supported
+    manifest: https://zbiotics.myshopify.com/.well-known/ucp/2026-04-08
+  - version: '2026-01-23'
+    status: supported
+    manifest: https://zbiotics.myshopify.com/.well-known/ucp/2026-01-23
+  mcp_protocol_version: '2025-06-18'
+  policy_published: false
+  note: >-
+    Three dated versions are concurrently addressable, but nothing states how long a version is
+    kept, how much notice precedes a removal, or who decides. The version ladder is real; the
+    policy governing it is not published.
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  detail: >-
+    No Deprecation or Sunset response header was observed on any probed response, and no
+    deprecation notice appears in any tool description or in llms.txt. No Deprecation pointer is
+    emitted.
+status_page:
+  published: false
+  url: null
+  detail: >-
+    ZBiotics operates no status page. The underlying platform publishes status.shopify.com, but
+    that is Shopify's page about Shopify, not a ZBiotics commitment about this endpoint, and
+    wiring it would credit ZBiotics with an operational surface it does not run. No StatusPage
+    pointer is emitted.
+sla:
+  published: false
+  detail: No uptime, latency or support-response commitment is published for the agent surface.
+changelog:
+  published: false
+  detail: >-
+    No dated API changelog exists. The company blog at /blogs/journal is product and science
+    writing, not release notes - the most recent entry indexed in the sitemap is dated
+    2026-09-03 and concerns the product, not the API. No ChangeLog pointer is emitted.
+maturity:
+  server_version: 0.1.0
+  detail: >-
+    initialize reports serverInfo name universal-commerce version 0.1.0. That is the platform
+    implementation's own version string and should not be read as a ZBiotics release number.
+x-evidence:
+  fetched: '2026-09-05'
+  probes:
+  - url: https://zbiotics.com/.well-known/ucp.json
+    http_status: 200
+  - url: https://zbiotics.com/api/ucp/mcp
+    http_status: 200
+    note: response header x-shopify-ucp-mcp-api-version 2026-08-25

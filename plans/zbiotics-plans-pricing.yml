@@ -1,0 +1,71 @@
+generated: '2026-09-05'
+method: probed
+source: https://zbiotics.com/collections/all/products.json
+docs: https://zbiotics.com/products/zbiotics
+summary: >-
+  ZBiotics sells a physical product, not API access. There is no developer plan, no usage tier, no
+  metering and no paywall on the UCP MCP endpoint - tool discovery is free and anonymous, and the
+  transaction an agent performs is a retail purchase at the same price a human pays. plan_count is
+  therefore 0, and that is the correct answer rather than a gap. What the store does publish, and
+  publishes machine-readably, is its retail price list, recorded below so the commercial surface
+  an agent actually transacts is not invisible.
+plan_count: 0
+plans: []
+api_access_model:
+  metered: false
+  paid: false
+  registration_required: false
+  detail: >-
+    No signup, key issuance or contract is needed to call tools/list. tools/call requires a
+    dereferenceable agent profile URI and get_order requires a customer JWT, but neither is
+    purchased.
+retail_catalog:
+  note: >-
+    Retail SKU pricing, not API plans. Read from the store's public products JSON feed, which is
+    the same catalogue the MCP search_catalog and get_product tools serve.
+  currency: USD
+  source: https://zbiotics.com/collections/all/products.json
+  product_count: 6
+  variant_count: 13
+  products:
+  - handle: zbiotics
+    name: Pre-Alcohol
+    variants:
+    - {variant: 1-pack, sku: ZB-BG-AL-01-RTL, price: '13.00'}
+    - {variant: 3-pack, sku: ZB-BG-AL-3, price: '36.00'}
+    - {variant: 6-pack, sku: ZB-BG-AL-06, price: '60.00'}
+    - {variant: 12-pack, sku: ZB-BG-AL-12, price: '108.00'}
+    - {variant: 50-pack, sku: ZB-BG-AL-50, price: '350.00'}
+    - {variant: 100-pack, sku: ZB-BG-AL-100, price: '625.00'}
+  - handle: sugar-to-fiber
+    name: Sugar-to-Fiber
+    variants:
+    - {variant: 'Stick 30 servings / Maple', sku: ZB-SP-SF-MF-30-DTC, price: '80.00'}
+    - {variant: 'Stick 30 servings / Unflavored', sku: ZB-SP-SF-UF-30-DTC, price: '80.00'}
+  - handle: zbiotics-bulk
+    name: Pre-Alcohol Bulk Packs
+    variants:
+    - {variant: 50-pack, sku: ZB-BG-AL-50, price: '350.00'}
+    - {variant: 100-pack, sku: ZB-BG-AL-100, price: '625.00'}
+  landing_page_duplicates:
+    detail: >-
+      Three further handles (zbiotics-3-pack, zbiotics-6-pack, zbiotics-12-pack) are landing-page
+      duplicates of the Pre-Alcohol pack sizes at the same prices, distinguished only by an _LP
+      suffix on the SKU. Recorded because an agent searching the catalogue will see them and
+      should not treat them as distinct products.
+  subscription:
+    offered: true
+    page: https://zbiotics.com/pages/subscription
+    terms_captured: false
+    note: >-
+      A subscription programme exists on the storefront. Its discount terms were not captured
+      because they are rendered client side and the pipeline does not restate a price it did not
+      read from a machine-readable source.
+x-evidence:
+  fetched: '2026-09-05'
+  probes:
+  - url: https://zbiotics.com/collections/all/products.json
+    http_status: 200
+    bytes: 26056
+  - url: https://zbiotics.com/products/zbiotics
+    http_status: 200

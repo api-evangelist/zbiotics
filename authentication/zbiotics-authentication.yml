@@ -1,0 +1,123 @@
+generated: '2026-09-05'
+method: probed
+source: >-
+  https://zbiotics.com/.well-known/openid-configuration,
+  https://zbiotics.com/.well-known/oauth-protected-resource,
+  https://zbiotics.com/api/ucp/mcp (tools/list, anonymous)
+docs: https://zbiotics.com/agents.md
+summary: >-
+  ZBiotics runs a three-tier posture, established by probing rather than by reading a docs page.
+  DISCOVERY on the UCP MCP endpoint is anonymous - tools/list and initialize answered a POST with
+  no credential. INVOCATION is not: tools/call requires meta["ucp-agent"]["profile"] to be a URI
+  the store can actually fetch, and it performs a live outbound GET of that document on every
+  call. ORDER-SCOPED tools require a customer-account JWT on top of that. The customer account
+  surface is OpenID Connect: zbiotics.com and account.zbiotics.com both serve an OIDC discovery
+  document with authorization_code + PKCE S256 and a jwks_uri. There is no API-key programme, no
+  developer registration, and no published client-credentials flow.
+derived_from: probed discovery documents; the provider publishes no OpenAPI securitySchemes.
+schemes:
+- id: ucp-mcp-discovery-anonymous
+  type: none
+  surface: https://zbiotics.com/api/ucp/mcp
+  scope: tools/list, initialize
+  description: >-
+    No Authorization header is required or accepted for tool discovery. A bare POST returned the
+    full 13-tool manifest with input schemas.
+  verified: probed
+  evidence:
+    url: https://zbiotics.com/api/ucp/mcp
+    method: POST
+    http_status: 200
+    note: tools/list returned 13 tools with no credential supplied.
+- id: ucp-agent-profile
+  type: agent-profile-uri
+  surface: https://zbiotics.com/api/ucp/mcp
+  scope: tools/call (all 13 tools)
+  description: >-
+    Not a bearer credential and not an API key - a dereferenceable identity. Every tool's
+    inputSchema requires meta["ucp-agent"]["profile"], and the store performs a live outbound GET
+    of that URI on each call. Omitting it returns -32001 invalid_profile_url (HTTP 422); supplying
+    a URI the store cannot fetch returns -32001 profile_unreachable (HTTP 422). An agent must
+    therefore publish a reachable profile document before it can transact.
+  verified: probed
+  evidence:
+    url: https://zbiotics.com/api/ucp/mcp
+    method: POST
+    http_status: 422
+    note: >-
+      Observed twice - once with meta omitted (invalid_profile_url) and once with a profile URI
+      that does not resolve (profile_unreachable).
+- id: customer-account-jwt
+  type: http
+  scheme: bearer
+  bearer_format: JWT
+  surface: https://zbiotics.com/api/ucp/mcp
+  scope: get_order (and, by the platform's documentation, other customer-scoped tools)
+  description: >-
+    get_order refused an anonymous call with -32000 AuthenticationRequired, HTTP 403, and a
+    message naming the tool and linking
+    https://shopify.dev/docs/agents/get-started/authentication. The token is a customer-account
+    JWT obtained through the OIDC flow below, scope customer-account-mcp-api:full.
+  verified: probed
+  evidence:
+    url: https://zbiotics.com/api/ucp/mcp
+    method: POST
+    http_status: 403
+- id: shopify-customer-account-oidc
+  type: openIdConnect
+  surface: https://account.zbiotics.com
+  openIdConnectUrl: https://zbiotics.com/.well-known/openid-configuration
+  issuer: https://shopify.com/authentication/11751391332
+  authorization_endpoint: https://account.zbiotics.com/authentication/oauth/authorize
+  token_endpoint: https://account.zbiotics.com/authentication/oauth/token
+  end_session_endpoint: https://account.zbiotics.com/authentication/logout
+  jwks_uri: https://account.zbiotics.com/authentication/.well-known/jwks.json
+  flows: [authorization_code, refresh_token, 'urn:ietf:params:oauth:grant-type:jwt-bearer']
+  response_types_supported: [code]
+  pkce:
+    required_methods: [S256]
+  token_endpoint_auth_methods_supported: [client_secret_basic, client_secret_post]
+  id_token_signing_alg_values_supported: [RS256]
+  subject_types_supported: [public]
+  claims_supported: [iss, sub, aud, exp, iat, nonce, sid, email, email_verified]
+  scopes: scopes/zbiotics-scopes.yml
+  verified: probed
+  note: >-
+    This is Shopify's Customer Accounts identity, exposed on the merchant's own hosts. The
+    op_policy_uri and op_tos_uri in the document point at shopify.com legal pages, which is the
+    honest tell that the identity provider is the platform rather than ZBiotics itself; the
+    authorization and token endpoints are nevertheless served on account.zbiotics.com.
+protected_resources:
+- resource: https://zbiotics.com
+  authorization_servers:
+  - https://account.zbiotics.com
+  - https://shopify.com/authentication/11751391332
+  bearer_methods_supported: [header]
+  spec: RFC 9728
+  file: well-known/zbiotics-oauth-protected-resource.json
+- resource: https://account.zbiotics.com
+  spec: RFC 9728
+  file: well-known/zbiotics-account-oauth-protected-resource.json
+gaps:
+- No security.txt on any host (404 on zbiotics.com, account.zbiotics.com, zbiotics.myshopify.com, privacy.zbiotics.com).
+- No published developer credential lifecycle - no key issuance, rotation, or revocation documentation.
+- >-
+  Outside of the order tools there is no per-agent credential, so for catalog, cart and checkout
+  the only identity signal available to the store is the ucp-agent profile URI it dereferences -
+  strong enough to require an agent to be publicly identifiable, but not a secret and not revocable
+  per key.
+- >-
+  Nothing on a ZBiotics-controlled page documents any of this. The authentication path is stated
+  only inside a live error message, which links the platform vendor's docs rather than the
+  provider's own.
+x-evidence:
+  fetched: '2026-09-05'
+  probes:
+  - url: https://zbiotics.com/.well-known/openid-configuration
+    http_status: 200
+  - url: https://account.zbiotics.com/.well-known/openid-configuration
+    http_status: 200
+  - url: https://zbiotics.com/.well-known/oauth-protected-resource
+    http_status: 200
+  - url: https://zbiotics.com/api/ucp/mcp
+    http_status: 200

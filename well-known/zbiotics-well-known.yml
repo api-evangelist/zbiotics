@@ -1,0 +1,123 @@
+generated: '2026-09-05'
+method: probed
+source: https://zbiotics.com/.well-known/
+summary: >-
+  Named-path probe of the /.well-known/ discovery surface on every host this record knows.
+  zbiotics.com serves four real documents - OIDC discovery, RFC 8414 authorization-server
+  metadata, RFC 9728 protected-resource metadata, and a Universal Commerce Protocol (UCP)
+  merchant manifest. security.txt, api-catalog, ai-plugin, apis.json, aauth-resource, acp and
+  both agent-card paths are absent on every host.
+path_echo_control: passed
+soft_404_control:
+  note: >-
+    zbiotics.com answers every unknown /.well-known/ path with an HTTP 404 and a 4,264-byte HTML
+    "404 Not Found" body, so a 200 here is a real document, not a catch-all. A negative control at
+    /.well-known/zbiotics-negative-control-7f3ab91c.json returned 404, and the same control on
+    account.zbiotics.com returned 404.
+  control_path: /.well-known/zbiotics-negative-control-7f3ab91c.json
+  control_status: 404
+hit_count: 5
+hosts:
+  - host: https://zbiotics.com
+    documents:
+      - path: /.well-known/openid-configuration
+        status: 200
+        file: zbiotics-openid-configuration.json
+      - path: /.well-known/oauth-authorization-server
+        status: 200
+        file: zbiotics-oauth-authorization-server.json
+      - path: /.well-known/oauth-protected-resource
+        status: 200
+        file: zbiotics-oauth-protected-resource.json
+      - path: /.well-known/ucp.json
+        status: 200
+        file: zbiotics-ucp.json
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/api-catalog.json
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/apis.json
+        status: 404
+      - path: /apis.json
+        status: 404
+      - path: /apis.yml
+        status: 404
+      - path: /.well-known/aauth-resource.json
+        status: 404
+      - path: /.well-known/acp.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: https://account.zbiotics.com
+    documents:
+      - path: /.well-known/openid-configuration
+        status: 200
+        note: >-
+          Byte-identical issuer/endpoint set to the zbiotics.com copy; not saved twice.
+      - path: /.well-known/oauth-authorization-server
+        status: 200
+        note: Same document as openid-configuration on this host.
+      - path: /.well-known/oauth-protected-resource
+        status: 200
+        file: zbiotics-account-oauth-protected-resource.json
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: https://zbiotics.myshopify.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+  - host: https://privacy.zbiotics.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+notable:
+  ucp:
+    path: /.well-known/ucp.json
+    protocol: Universal Commerce Protocol
+    version: '2026-08-25'
+    supported_versions: ['2026-08-25', '2026-04-08', '2026-01-23']
+    services: [dev.ucp.shopping]
+    mcp_endpoint: https://zbiotics.myshopify.com/api/ucp/mcp
+    capabilities:
+      - dev.ucp.shopping.checkout
+      - dev.ucp.shopping.fulfillment
+      - dev.ucp.shopping.discount
+      - dev.ucp.shopping.cart
+      - dev.ucp.shopping.order
+      - dev.ucp.shopping.catalog.search
+      - dev.ucp.shopping.catalog.lookup
+      - dev.shopify.catalog
+    payment_handlers: [com.google.pay, dev.shopify.card, dev.shopify.shop_pay]
+  oauth:
+    issuer: https://shopify.com/authentication/11751391332
+    authorization_endpoint: https://account.zbiotics.com/authentication/oauth/authorize
+    token_endpoint: https://account.zbiotics.com/authentication/oauth/token
+    jwks_uri: https://account.zbiotics.com/authentication/.well-known/jwks.json
+    note: >-
+      The RFC 9728 protected-resource document on zbiotics.com names two authorization servers,
+      one of which (account.zbiotics.com) is a different host on the same registrable domain - the
+      third-host case the pipeline warns about. Both were probed.
+x-evidence:
+  fetched: '2026-09-05'
+  hosts_probed: 4
+  paths_probed: 38

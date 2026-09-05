@@ -1,0 +1,145 @@
+generated: '2026-09-05'
+method: derived
+source: mcp/zbiotics-mcp-tools.json, llms/zbiotics-llms.txt
+summary: >-
+  ZBiotics publishes no OpenAPI and no GraphQL SDL, so this crosswalk binds the 13 live MCP tools
+  to the read-only HTTP endpoints the provider documents in its own llms.txt instead of to
+  operationIds. The point of the exercise still holds: the two surfaces are overlapping but not
+  identical, and the divergence is one-directional and stark. Every write capability exists ONLY
+  in MCP; the HTTP surface is read-only. Binding confidence is therefore honest rather than high -
+  these are semantic bindings between a tool and a documented URL pattern, not a spec-verified map.
+surfaces:
+  openapi:
+    present: false
+    note: >-
+      404 at /openapi.json, /openapi.yaml, /swagger.json, /api-docs, /docs and /redoc on
+      zbiotics.com. No spec exists to bind operationIds against.
+  graphql:
+    present: false
+    note: >-
+      /graphql returns the storefront 404 page. The store's llms.txt points agents at
+      https://mock.shop for a Storefront GraphQL API, but that is Shopify's public mock service,
+      not a ZBiotics endpoint, and is deliberately not treated as this provider's surface.
+  mcp:
+    url: https://zbiotics.com/api/ucp/mcp
+    gated: partially
+    note: tools/list anonymous; tools/call needs a resolvable agent profile; get_order needs a customer JWT.
+  http_readonly:
+    documented_in: https://zbiotics.com/llms.txt
+    gated: false
+    note: >-
+      Documented by the provider as "Read-Only Browsing (No Authentication Required)". These are
+      Shopify storefront JSON routes, verified live on this store.
+crosswalk:
+- tool: search_catalog
+  category: catalog
+  rest: ['GET /search?q={query}&type=product', 'GET /collections/all/products.json']
+  binding: semantic
+  confidence: medium
+  note: >-
+    Both return ZBiotics products for a query, but the parameters do not correspond - the tool
+    accepts buyer context, signals and a minor-unit price filter that the HTTP route has no
+    equivalent for, and the HTTP route exposes no relevance ranking control.
+- tool: lookup_catalog
+  category: catalog
+  rest: ['GET /products/{handle}.json']
+  binding: semantic
+  confidence: medium
+  note: >-
+    The tool takes 1-10 opaque product IDS in one call; the HTTP route takes exactly one HANDLE.
+    Different identifier space and different cardinality, so an agent cannot substitute one for
+    the other without a resolution step.
+- tool: get_product
+  category: catalog
+  rest: ['GET /products/{handle}.json']
+  binding: semantic
+  confidence: medium
+  note: Same handle-versus-id mismatch as lookup_catalog.
+- tool: get_cart
+  category: cart
+  rest: []
+  binding: none
+  confidence: high
+- tool: create_cart
+  category: cart
+  rest: []
+  binding: none
+  confidence: high
+- tool: update_cart
+  category: cart
+  rest: []
+  binding: none
+  confidence: high
+- tool: cancel_cart
+  category: cart
+  rest: []
+  binding: none
+  confidence: high
+- tool: get_checkout
+  category: checkout
+  rest: []
+  binding: none
+  confidence: high
+- tool: create_checkout
+  category: checkout
+  rest: []
+  binding: none
+  confidence: high
+- tool: update_checkout
+  category: checkout
+  rest: []
+  binding: none
+  confidence: high
+- tool: complete_checkout
+  category: checkout
+  rest: []
+  binding: none
+  confidence: high
+- tool: cancel_checkout
+  category: checkout
+  rest: []
+  binding: none
+  confidence: high
+- tool: get_order
+  category: order
+  rest: []
+  binding: none
+  confidence: high
+mcp_only:
+- {tool: get_cart, reason: No public HTTP cart-read route is documented for agents.}
+- {tool: create_cart, reason: Write. The documented HTTP surface is read-only.}
+- {tool: update_cart, reason: Write.}
+- {tool: cancel_cart, reason: Write.}
+- {tool: get_checkout, reason: Checkout state is not exposed on the documented read-only surface.}
+- {tool: create_checkout, reason: Write.}
+- {tool: update_checkout, reason: Write.}
+- {tool: complete_checkout, reason: Write, and the only irreversible operation on the surface.}
+- {tool: cancel_checkout, reason: Write.}
+- {tool: get_order, reason: Requires a customer-account JWT; no unauthenticated HTTP equivalent.}
+rest_only:
+- endpoint: 'GET /collections/{handle}'
+  reason: Collection browsing has no MCP tool; the tools are query- and id-driven, not collection-driven.
+- endpoint: 'GET /collections/{handle}/products.json'
+  reason: Bulk collection export has no MCP equivalent.
+- endpoint: 'GET /sitemap.xml'
+  reason: Crawl discovery, deliberately outside the tool surface.
+- endpoint: 'GET /agents.md'
+  reason: The agent instructions document itself; discovery, not a tool.
+coverage:
+  mcp_tools: 13
+  http_routes_documented: 6
+  bound: 3
+  mcp_only: 10
+  rest_only: 4
+  bound_high_confidence: 0
+  note: >-
+    Zero high-confidence bindings is the finding, not a shortfall in the analysis. With no
+    OpenAPI there is no operationId to bind to, and the three semantic bindings that do exist all
+    cross an identifier boundary (product id versus product handle) that an agent must bridge
+    itself.
+x-evidence:
+  derived_on: '2026-09-05'
+  mcp_source_url: https://zbiotics.com/api/ucp/mcp
+  http_routes_source: https://zbiotics.com/llms.txt
+  http_routes_verified:
+  - {url: 'https://zbiotics.com/collections/all/products.json', http_status: 200}
