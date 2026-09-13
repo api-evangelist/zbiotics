@@ -5,7 +5,7 @@
       "source": "https://zbiotics.com/blogs/journal",
       "feed_url": "https://zbiotics.com/blogs/journal.atom",
       "title": "",
-      "saved": 3,
+      "saved": 0,
       "method": "discovered"
     },
     {
@@ -14,8 +14,15 @@
       "title": "",
       "saved": 0,
       "method": "none"
+    },
+    {
+      "source": "https://zbiotics.com/blogs/journal.atom",
+      "feed_url": "https://zbiotics.com/blogs/journal.atom",
+      "title": "",
+      "saved": 0,
+      "method": "feed"
     }
   ],
-  "post_count": 3,
-  "fetched": "2026-09-06T19:17:18Z"
+  "post_count": 30,
+  "fetched": "2026-09-13T13:00:00Z"
 }
