@@ -25,6 +25,17 @@ tags:
 - Direct to Consumer
 - E-Commerce
 - Agentic Commerce
+- MCP
+- Universal Commerce Protocol
+- Shopify
+- Company
+tags_raw:
+- Biotechnology
+- Probiotics
+- Consumer Health
+- Direct to Consumer
+- E-Commerce
+- Agentic Commerce
 - Model Context Protocol
 - Universal Commerce Protocol
 - Shopify
@@ -43,6 +54,13 @@ apis:
   baseURL: https://zbiotics.com/api/ucp/mcp
   image: https://zbiotics.com/cdn/shop/files/zbiotics-logo.svg?v=1714027569
   tags:
+  - Agentic Commerce
+  - MCP
+  - Universal Commerce Protocol
+  - E-Commerce
+  - Catalog
+  - Checkout
+  tags_raw:
   - Agentic Commerce
   - Model Context Protocol
   - Universal Commerce Protocol
