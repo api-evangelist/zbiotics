@@ -70,6 +70,9 @@ apis:
   properties:
   - type: MCPServer
     url: mcp/zbiotics-mcp.yml
+  x-surface: platform-generated
+  x-platform: shopify
+  x-platform-surface: ucp
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
