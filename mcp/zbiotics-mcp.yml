@@ -50,61 +50,249 @@ alternate_endpoints:
 tools_file: zbiotics-mcp-tools.json
 tool_count: 13
 tools:
-- name: search_catalog
-  category: catalog
-  read_only: true
-  description: Search for products from the ZBiotics online store.
-- name: lookup_catalog
-  category: catalog
-  read_only: true
-  description: Look up multiple products or variants by identifier (1-10 ids per call).
-- name: get_product
-  category: catalog
-  read_only: true
-  description: Retrieve complete product detail by identifier; returns a single product.
-- name: get_cart
-  category: cart
-  read_only: true
-  description: Get the cart contents.
-- name: create_cart
-  category: cart
-  read_only: false
-  description: Creates a new cart from line_items (product variant id + quantity).
-- name: update_cart
-  category: cart
-  read_only: false
-  description: Perform updates to a cart.
-- name: cancel_cart
-  category: cart
-  read_only: false
-  reversal_of: create_cart
-  description: Cancels a cart.
 - name: get_checkout
+  description: 'Returns details about the checkout, including line items, totals, and any applicable discounts
+    or taxes.
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
   category: checkout
   read_only: true
-  description: Returns checkout details including line items, totals, discounts and taxes.
 - name: create_checkout
+  description: 'Creates a checkout. Returns checkout details, including line items, totals, and any applicable
+    discounts or taxes.
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
   category: checkout
   read_only: false
-  description: Creates a checkout.
 - name: update_checkout
+  description: 'Updates a checkout. Returns checkout details, including line items, totals, and any applicable
+    discounts or taxes.
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
   category: checkout
   read_only: false
-  description: Updates a checkout (shipping address, fulfillment method, payment instruments).
 - name: complete_checkout
+  description: 'Completes a checkout and returns the checkout result. Returns details about the completed
+    checkout, including order ID, Thank You Page URL, or any errors encountered.
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
   category: checkout
   read_only: false
-  description: Completes a checkout and returns the order ID / Thank You Page URL. Buyer approval of payment
-    is required; the provider states agents must not complete payment without it.
 - name: cancel_checkout
+  description: 'Cancels a checkout.
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
   category: checkout
   read_only: false
   reversal_of: create_checkout
-  description: Cancels a checkout.
+- name: get_cart
+  description: 'Get the cart contents
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
+  category: cart
+  read_only: true
+- name: create_cart
+  description: 'Creates a new cart
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
+  category: cart
+  read_only: false
+- name: update_cart
+  description: 'Perform updates to a cart.
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
+  category: cart
+  read_only: false
+- name: cancel_cart
+  description: 'Cancels a cart.
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
+  category: cart
+  read_only: false
+  reversal_of: create_cart
 - name: get_order
+  description: 'Get the details of an order
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
   category: order
   read_only: true
-  description: Get the details of an order by gid://shopify/Order/{id}.
+- name: search_catalog
+  description: 'Search for products from the online store, hosted on Shopify.
+
+
+    This tool can be used to search for products using natural language queries, specific filter criteria,
+    or both.
+
+    At least one of query or filters must be provided.
+
+
+    Results are paginated, with initial results limited to improve experience.
+
+    Use the pagination.cursor from the response to fetch additional pages when users request more results.
+
+
+    Response conforms to the UCP catalog search capability (dev.ucp.shopping.catalog.search).
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
+  category: catalog
+  read_only: true
+- name: lookup_catalog
+  description: 'Look up multiple products or variants by identifier.
+
+    Use this tool to resolve multiple product/variant IDs in a single request.
+
+
+    Supports:
+
+    - Product IDs (gid://shopify/Product/...): Returns product with match: "featured"
+
+    - Variant IDs (gid://shopify/ProductVariant/...): Returns parent product with the exact variant
+
+
+    Results are grouped by product. Each variant includes an inputs array showing
+
+    which request ID resolved to it and whether the match was exact or featured.
+
+    In versions that require input correlations, only matched variants are returned.
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).
+
+
+
+    Maximum 10 IDs per request.'
+  category: catalog
+  read_only: true
+- name: get_product
+  description: 'Retrieve complete product detail by identifier. Returns a singular product
+
+    with a relevant set of variants, exact pricing, and real-time availability.
+
+    Supports interactive option selection via selected and preferences parameters
+
+    for variant narrowing and availability signals. Use for product detail page
+
+    rendering and purchase decisions.
+
+
+    Prices in the response are integers in the currency''s ISO 4217 minor units, paired with
+
+    a currency code: {"amount": 600, "currency": "USD"} is $6.00 and {"amount": 2500,
+
+    "currency": "USD"} is $25.00. Convert to major units before quoting a price to a buyer
+
+    (divide by 100 for two-decimal currencies such as USD and EUR; zero-decimal currencies
+
+    such as JPY are already whole units).'
+  category: catalog
+  read_only: true
 conventions_observed:
   money: 'All prices are integers in ISO 4217 minor units paired with a currency code ({"amount": 600,
     "currency": "USD"} is $6.00). Stated verbatim in every tool description.'
@@ -169,3 +357,4 @@ tool_quality:
   scored: false
   note: Facts from the saved tools/list capture (mcp_tool_quality.py); recorded, not scored. Checks learned
     from Glimind's agent-readiness audit.
+tools_count: 13
